@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Restaurant Finder</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="consumerKey">LxWoEg49WquC6DlKeOpqiA</string>
+    <string name="consumerSecret">W8R3nQe9JPNkj81kKgGF_D07z3c</string>
+    <string name="token">HGOXjLe8PzHCISL_rx_6HfDaoJ-9HRN6</string>
+    <string name="tokenSecret">fWofnA5BvTMBzY7qXWLV3oFNdAU</string>
+    <string name="action_settings">Settings</string>
+    <string name="search_label">Search Lable</string>
+    <string name="search_hint">Search hint</string>
+
+
+</resources>

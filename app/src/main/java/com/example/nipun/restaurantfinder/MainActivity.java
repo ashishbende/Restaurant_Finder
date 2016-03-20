@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     private TextView mAttributions;
     private static final LatLngBounds BOUNDS_MOUNTAIN_VIEW = new LatLngBounds(
             new LatLng(37.398160, -122.180831), new LatLng(37.430610, -121.972090));
+     public  Place place;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        Thread thread = new Thread(new Runnable(){
+        /*Thread thread = new Thread(new Runnable(){
             @Override
             public void run() {
                 YelpAPI yelpAPI = getYelpAPI();
@@ -84,17 +86,17 @@ public class MainActivity extends AppCompatActivity
         });
 
         thread.start();
+*/
 
 
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+      /*  FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

@@ -44,4 +44,5 @@ dependencies {
     compile 'com.yelp.clientlib:yelp-android:1.0.0'
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }

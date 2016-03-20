@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+
+    android:padding="8dp" >
+
+    <!-- Restaurant Image -->
+    <ImageView
+        android:id="@+id/imageurl"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="8dp" />
+
+    <!-- Restaurant Title -->
+    <TextView
+        android:id="@+id/businessname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageurl"
+        android:layout_toRightOf="@+id/imageurl"
+        android:textSize="@dimen/businessname"
+        android:textStyle="bold" />
+
+    <!-- Restaurant Rating -->
+    <ImageView
+        android:id="@+id/rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/businessname"
+        android:layout_marginTop="1dip"
+
+        android:layout_toRightOf="@+id/imageurl" />
+    
+    <!-- Restaurant Address -->
+    <TextView
+        android:id="@+id/address"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rating"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/imageurl"
+        android:textColor="@color/address"
+        android:textSize="@dimen/address" />
+
+
+</RelativeLayout>

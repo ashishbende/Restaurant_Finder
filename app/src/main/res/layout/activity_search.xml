@@ -37,10 +37,34 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"/>
 
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/radiogroup"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <RadioButton android:id="@+id/relevance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Relevance"
+            android:onClick="onRadioButtonClicked"
+            android:checked="true" />
+        <RadioButton android:id="@+id/distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance"
+            android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
 
-    <ListView android:id="@+id/list" android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:divider="@color/list_divider"
-        android:dividerHeight="1dp" android:listSelector="@drawable/list_row_selector" />
+
+
+    <ListView android:id="@+id/list"
+        android:layout_below="@id/radiogroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@color/list_divider"
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/list_row_selector" />
 
 
 

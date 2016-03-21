@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,8 +15,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.widget.SearchView;
@@ -51,8 +54,6 @@ public class SearchActivity extends AppCompatActivity {
     private CustomListAdapter adapter;
     private List<Restaurant> restaurantList = new ArrayList<Restaurant>();
     private CoordinateOptions coordinate;
-
-
     private static final int PLACE_PICKER_REQUEST = 1;
     private TextView smName;
     private TextView smAddress;
@@ -61,14 +62,17 @@ public class SearchActivity extends AppCompatActivity {
             new LatLng(37.398160, -122.180831), new LatLng(37.430610, -121.972090));
     public  Place place;
     String toastMsg;
+    String sortingCriteria;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        //getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
-        handleIntent(getIntent());
 
 
 
@@ -81,19 +85,49 @@ public class SearchActivity extends AppCompatActivity {
 
 
         listView = (ListView) findViewById(R.id.list);
+       // listView.setAdapter(null);
         adapter = new CustomListAdapter(this, restaurantList);
+
         listView.setAdapter(adapter);
+        handleIntent(getIntent());
 
 
 
 
     }
+
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.relevance:
+                if (checked)
+                    // Sort by Relavance
+                sortingCriteria = "0";
+                handleIntent(getIntent());
+
+                    break;
+            case R.id.distance:
+                if (checked)
+                    // Sort By Distance
+                    sortingCriteria = "1";
+                    handleIntent(getIntent());
+                    break;
+        }
+    }
+
+
 
     @Override
     protected void onNewIntent(Intent intent) {
+
         setIntent(intent);
         handleIntent(intent);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -129,6 +163,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private void handleIntent(Intent intent) {
         Log.i("SearchActivity", "hiiiii");
+
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             String location = intent.getStringExtra("Place");
@@ -137,9 +172,17 @@ public class SearchActivity extends AppCompatActivity {
             //Toast toast = Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT);
                     //toast.show();
 
+            if(restaurantList != null)
+                restaurantList.clear();
+            if(adapter != null)
+                adapter.notifyDataSetChanged();
+
 
             //place = PlacePicker.getPlace(this, intent);
             if(place != null){
+
+
+
 
                 Log.i(" Handle intent " , "Location is " + place.getName());
                 doMySearch(query);
@@ -189,6 +232,7 @@ public class SearchActivity extends AppCompatActivity {
 
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -248,6 +292,8 @@ public class SearchActivity extends AppCompatActivity {
         }
         @Override
         protected void onPostExecute(ArrayList<Business> result) {
+
+
             if (result != null) {
                 StringBuilder response1 = new StringBuilder();
                 for (Business obj : result) {
@@ -273,8 +319,10 @@ public class SearchActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     return null;
                 }
+
             }*/
                 adapter.notifyDataSetChanged();
+
             }
         }
     }
@@ -327,6 +375,7 @@ public class SearchActivity extends AppCompatActivity {
 
         params.put("category_filter","restaurants");
         params.put("term", searchString);
+        params.put("sort" , sortingCriteria);
         params.put("limit", "20");
         params.put("radius_filter","16093");
         params.put("lang", "en");

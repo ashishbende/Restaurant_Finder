@@ -127,6 +127,18 @@ public class CustomListAdapter extends BaseAdapter {
         return convertView;
     }
 
+
+    public void clear(){
+
+        restaurantsItems.clear();
+
+
+
+
+
+
+
+    }
     private class MyAsyncTaskForImage extends AsyncTask<String,Void,Bitmap> {
         @Override
         protected Bitmap doInBackground(String... params) {

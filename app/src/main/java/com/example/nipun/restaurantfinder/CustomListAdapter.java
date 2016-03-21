@@ -1,8 +1,6 @@
 package com.example.nipun.restaurantfinder;
 
-/**
- * Created by Nipun on 3/18/16.
- */
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;

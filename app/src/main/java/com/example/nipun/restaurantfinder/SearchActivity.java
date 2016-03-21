@@ -44,10 +44,7 @@ import java.util.Map;
 import retrofit.Call;
 
 public class SearchActivity extends AppCompatActivity {
-
-    //////ksdufgksbkbksgb
-    //enjoylife
-
+    
     private LinearLayout mContentLayout;
 
     private ListView listView;

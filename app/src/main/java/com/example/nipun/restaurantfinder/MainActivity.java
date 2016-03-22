@@ -1,13 +1,18 @@
 package com.example.nipun.restaurantfinder;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.SearchView;
@@ -28,8 +33,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
@@ -47,7 +55,7 @@ import java.util.Map;
 import retrofit.Call;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final int PLACE_PICKER_REQUEST = 1;
     private TextView mName;
@@ -56,7 +64,10 @@ public class MainActivity extends AppCompatActivity
     private static final LatLngBounds BOUNDS_MOUNTAIN_VIEW = new LatLngBounds(
             new LatLng(37.398160, -122.180831), new LatLng(37.430610, -121.972090));
      public  Place place;
+    public double currentLatitude, currentLongitude;
 
+private GoogleApiClient Gclient;
+private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,32 +82,13 @@ public class MainActivity extends AppCompatActivity
         mAddress = (TextView) findViewById(R.id.textView2);
         mAttributions = (TextView) findViewById(R.id.textView3);
 
-
-
-        /*Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run() {
-                YelpAPI yelpAPI = getYelpAPI();
-                try {
-                    requestYelpSearch(yelpAPI);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        thread.start();
-*/
-
-
-      /*  FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+        if (Gclient == null) {
+        Gclient = new GoogleApiClient.Builder(this)
+        .addConnectionCallbacks(this)
+        .addOnConnectionFailedListener(this)
+        .addApi(LocationServices.API)
+        .build();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -180,8 +172,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-
     @Override
     protected void onActivityResult(int requestCode,
                                     int resultCode, Intent data) {
@@ -205,11 +195,6 @@ public class MainActivity extends AppCompatActivity
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-
-
-
-
-
 
     @Override
     public void onBackPressed() {
@@ -266,10 +251,108 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    protected void onStart() {
+        Gclient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        Gclient.disconnect();
+        super.onStop();
+    }
 
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
 
 
+        if (permissionCheck
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        MY_PERMISSIONS_COARSE_LOCATION);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                Gclient);
+        if (mLastLocation != null) {
 
 
+           /* latbuilder = new LatLngBounds.Builder();
+            latbuilder.include()*/
+           /* LatLng centerLocation = new LatLng(currentLatitude,currentLongitude);
+            Circle circle = new Circle();
+            mLastLocation*/
+            currentLatitude = mLastLocation.getLatitude();
+            Log.i("gClinet Latitude :",String.valueOf(currentLatitude));
+            currentLongitude = mLastLocation.getLongitude();
+            Log.i("gClinet Longitude :",String.valueOf(currentLongitude));
+            Toast.makeText(MainActivity.this,currentLatitude+""+currentLongitude,Toast.LENGTH_LONG).show();
+            /*// location got here.
+            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
+            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));*/
+        }
+
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_COARSE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Toast.makeText(MainActivity.this,"Coarse Granted",Toast.LENGTH_LONG).show();
+                    // permission wa
+                    // s granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+                    Toast.makeText(MainActivity.this,"Coarse Denied",Toast.LENGTH_LONG).show();
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
 }

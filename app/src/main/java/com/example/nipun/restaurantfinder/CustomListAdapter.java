@@ -80,8 +80,8 @@ public class CustomListAdapter extends BaseAdapter {
 
         Restaurant r = restaurantsItems.get(position);
         businessname.setText(r.getBusinessName());
-        String displayAddress = r.getdisplayAddress().toString();
-        address.setText(displayAddress.substring(1, displayAddress.length() - 1));
+        String displayAddress = r.getdisplayAddress();
+        address.setText(displayAddress);
 
         image = (ImageView) convertView.findViewById(R.id.imageurl);
         ratingImage = (ImageView) convertView.findViewById(R.id.rating);

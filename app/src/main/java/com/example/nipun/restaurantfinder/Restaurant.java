@@ -1,5 +1,6 @@
 package com.example.nipun.restaurantfinder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -8,15 +9,16 @@ import java.util.ArrayList;
 
 
 
-public class Restaurant {
+public class Restaurant implements Serializable {
     private String businessName, imageUrl,ratingUrl;
-    private ArrayList<String> displayAddress;
+    //private ArrayList<String> displayAddress;
+    private String displayAddress;
 
     public Restaurant(){
 
     }
 
-    public Restaurant(String businessName, String imageUrl, String ratingUrl, ArrayList<String> displayAddress) {
+    public Restaurant(String businessName, String imageUrl, String ratingUrl, String displayAddress) {
         this.businessName = businessName;
         this.imageUrl = imageUrl;
         this.displayAddress = displayAddress;
@@ -40,11 +42,11 @@ public class Restaurant {
         this.imageUrl = imageUrl;
     }
 
-    public ArrayList<String> getdisplayAddress() {
+    public String getdisplayAddress() {
         return displayAddress;
     }
 
-    public void setDisplayAddress(ArrayList<String> displayAddress) {
+    public void setDisplayAddress(String displayAddress) {
         this.displayAddress = displayAddress;
     }
 

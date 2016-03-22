@@ -18,19 +18,16 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-           >
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <meta-data android:name="android.app.default_searchable"
+            <meta-data
+                android:name="android.app.default_searchable"
                 android:value=".SearchableActivity" />
-
-
-
         </activity>
 
         <meta-data
@@ -43,23 +40,27 @@
             android:name="android.app.searchable"
             android:resource="@xml/search" />
 
-        <activity android:name=".SearchActivity"
+        <activity
+            android:name=".SearchActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
 
-
-
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable"
-                android:resource="@xml/search"/>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/search" />
         </activity>
+        <activity android:name=".FavoriteActivity" />
+        <activity android:name=".DetailActivity"
+            android:parentActivityName=".SearchActivity"></activity>
     </application>
 
 </manifest>

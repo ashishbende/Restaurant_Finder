@@ -16,13 +16,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.widget.SearchView;
-
+import android.widget.AdapterView.OnItemClickListener;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -52,7 +53,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private ListView listView;
     private CustomListAdapter adapter;
-    private List<Restaurant> restaurantList = new ArrayList<Restaurant>();
+    private ArrayList<Restaurant> restaurantList = new ArrayList<Restaurant>();
     private CoordinateOptions coordinate;
     private static final int PLACE_PICKER_REQUEST = 1;
     private TextView smName;
@@ -63,6 +64,9 @@ public class SearchActivity extends AppCompatActivity {
     public  Place place;
     String toastMsg;
     String sortingCriteria;
+    String attributions;
+    CharSequence name = "";
+    CharSequence address = "";
 
 
     @Override
@@ -85,17 +89,43 @@ public class SearchActivity extends AppCompatActivity {
 
 
         listView = (ListView) findViewById(R.id.list);
-       // listView.setAdapter(null);
+        // listView.setAdapter(null);
         adapter = new CustomListAdapter(this, restaurantList);
 
         listView.setAdapter(adapter);
         handleIntent(getIntent());
 
 
+        listView.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                // When clicked, show a toast with the TextView text
+                Context context = getApplicationContext();
+                CharSequence text = "ListView CLicked";
+                int duration = Toast.LENGTH_SHORT;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+
+
+                Log.i("tempAddress", address.toString());
+
+
+                Bundle send = new Bundle();
+                Wrapper wrapper = new Wrapper();
+                wrapper.setRest_list(restaurantList);
+                send.putSerializable("list", wrapper);
+                send.putInt("position", 1);
+                Intent sendDetails = new Intent(getApplicationContext(),DetailActivity.class);
+                sendDetails.putExtras(send);
+                startActivity(sendDetails);
+
+
+            }
+        });
 
 
     }
-
 
     public void onRadioButtonClicked(View view) {
         // Is the button now checked?
@@ -172,9 +202,9 @@ public class SearchActivity extends AppCompatActivity {
             //Toast toast = Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT);
                     //toast.show();
 
-            if(restaurantList != null)
+
                 restaurantList.clear();
-            if(adapter != null)
+
                 adapter.notifyDataSetChanged();
 
 
@@ -250,9 +280,9 @@ public class SearchActivity extends AppCompatActivity {
             place = PlacePicker.getPlace(this, data);
             toastMsg = String.format("Place: %s", place.getName());
             Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
-            final CharSequence name = place.getName();
-            final CharSequence address = place.getAddress();
-            String attributions = (String) place.getAttributions();
+             name = place.getName();
+            address = place.getAddress();
+             attributions = (String) place.getAttributions();
             if (attributions == null) {
                 attributions = "";
             }
@@ -302,7 +332,13 @@ public class SearchActivity extends AppCompatActivity {
                     restro.setImageUrl(obj.imageUrl());
                     restro.setBusinessName(obj.name());
                     restro.setRating(obj.ratingImgUrlLarge());
-                    restro.setDisplayAddress(obj.location().displayAddress());
+                    //restro.setDisplayAddress(obj.location().displayAddress());
+
+                    String address = "";
+                    for(String tempAddress: obj.location().displayAddress())
+                        address +=" " + tempAddress;
+                    restro.setDisplayAddress(address);
+                   // Log.i("tempAddress" , address);
                     response1.append(obj.imageUrl())
                             .append(obj.location().displayAddress());
                     //Log.i("Yelp response :", response1.toString());

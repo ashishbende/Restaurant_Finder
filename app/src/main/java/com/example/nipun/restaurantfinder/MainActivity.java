@@ -151,7 +151,6 @@ private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
         //noinspection SimplifiableIfStatement
         if (id == R.id.getlocation) {
 
-
             try {
                 PlacePicker.IntentBuilder intentBuilder =
                         new PlacePicker.IntentBuilder();

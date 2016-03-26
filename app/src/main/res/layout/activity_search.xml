@@ -10,8 +10,6 @@
     tools:context="com.example.nipun.restaurantfinder.SearchActivity">
 
 
-
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,7 +24,6 @@
         android:id="@+id/StextView2"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"/>
-
 
 
     <TextView
@@ -57,7 +54,6 @@
     </RadioGroup>
 
 
-
     <ListView android:id="@+id/list"
         android:layout_below="@id/radiogroup"
         android:layout_width="match_parent"
@@ -65,9 +61,6 @@
         android:divider="@color/list_divider"
         android:dividerHeight="1dp"
         android:listSelector="@drawable/list_row_selector" />
-
-
-
 
 
 </RelativeLayout>

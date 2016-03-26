@@ -59,8 +59,11 @@
                 android:resource="@xml/search" />
         </activity>
         <activity android:name=".FavoriteActivity" />
-        <activity android:name=".DetailActivity"
-            android:parentActivityName=".SearchActivity"></activity>
+        <activity
+            android:name=".DetailActivity"
+            android:label="@string/title_activity_detail"
+            android:parentActivityName=".SearchActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

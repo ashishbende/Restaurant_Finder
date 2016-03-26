@@ -10,5 +10,6 @@
     <dimen name="businessname">17dp</dimen>
 
     <dimen name="address">10dip</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
 
 </resources>

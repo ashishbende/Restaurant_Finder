@@ -1,6 +1,9 @@
 package com.example.nipun.restaurantfinder;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +28,7 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -47,6 +52,8 @@ public class DetailActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private List<Restaurant> restaurantList;
+    public static ArrayList<String> latList=new ArrayList<>(), lonList=new ArrayList<>();
+
 
 
 
@@ -58,6 +65,14 @@ public class DetailActivity extends AppCompatActivity {
         Intent i = getIntent();
         Wrapper restaurants = (Wrapper)i.getSerializableExtra("restaurants");
         int position = i.getIntExtra("CurrentElementPosition",0);
+
+        try{
+            latList = i.getStringArrayListExtra("latitude");
+            lonList = i.getStringArrayListExtra("longitude");
+
+        }catch(Exception e){
+
+        }
         restaurantList=restaurants.getRest_list();
 
 
@@ -66,9 +81,16 @@ public class DetailActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setIcon(R.drawable.location_picker);
+        getSupportActionBar().setIcon(R.drawable.ic_actionbar_icon);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -82,6 +104,21 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+
+        if (mViewPager.getCurrentItem() == 0) {
+            // If the user is currently looking at the first step, allow the system to handle the
+            // Back button. This calls finish() on this activity and pops the back stack.
+            super.onBackPressed();
+        } else {
+            // Otherwise, select the previous step.
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1);
+        }
+        //finish();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -115,6 +152,7 @@ public class DetailActivity extends AppCompatActivity {
          */
 
         private Restaurant res;
+        private int sectionNumber;
 
         private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -138,6 +176,8 @@ public class DetailActivity extends AppCompatActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             res = getArguments()!=null?(Restaurant)getArguments().getSerializable("currentRestaurant"):null;
+            sectionNumber = getArguments()!=null?getArguments().getInt(ARG_SECTION_NUMBER):0;
+
         }
 
         @Override
@@ -156,10 +196,33 @@ public class DetailActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     if(favButton.getText().equals(getString(R.string.heart_empty))) {
                         favButton.setText(getString(R.string.heart_fill));
-                        Toast.makeText(getActivity(), res.getBusinessName() + " is added to favList", Toast.LENGTH_LONG).show();
+                        FavoriteDatabaseHelper favDbHelp = new FavoriteDatabaseHelper(getContext());
+
+                        try {
+                            if(res.getLocation()!=null) {
+                                if(favDbHelp.insertRow(res.getBusinessName(), res.getImageUrl(),
+                                        res.getRating(), res.getPhoneNumber(), res.getReviewCount(),
+                                        res.getdisplayAddress().toString(),
+                                        res.getLocation().coordinate().latitude(),
+                                        res.getLocation().coordinate().latitude()
+                                )){
+                                    Toast.makeText(getActivity(), res.getBusinessName() + " is added to favList", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                            else {
+                                Toast.makeText(getActivity(), "Already deleted. Use Search to Insert Again", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                        catch (Exception e) {
+                            Toast.makeText(getActivity(), "Already deleted, Use Search to Insert Again", Toast.LENGTH_LONG).show();
+                        }
+
                     }else{
                         favButton.setText(getString(R.string.heart_empty));
-                        Toast.makeText(getActivity(), res.getBusinessName() + " is removed to favList", Toast.LENGTH_LONG).show();
+                        FavoriteDatabaseHelper favDbHelp = new FavoriteDatabaseHelper(getContext());
+                        if(favDbHelp.deleteRow(res.getBusinessName())){
+                            Toast.makeText(getActivity(), res.getBusinessName() + " is removed to favList", Toast.LENGTH_LONG).show();
+                        }
 
                     }
                 }
@@ -174,27 +237,66 @@ public class DetailActivity extends AppCompatActivity {
             TextView addressView= (TextView) rootView.findViewById(R.id.addressTextView);
             addressView.setText("Address: "+res.getdisplayAddress().toString());
             ImageView businessImage = (ImageView) rootView.findViewById(R.id.businessImageView);
-            Picasso.with(getActivity()).load(res.getImageUrl()).into(businessImage);
+            Picasso.with(getActivity()).load(res.getImageUrl()).resize(400,400).into(businessImage);
 
             ImageView ratingsImage = (ImageView) rootView.findViewById(R.id.ratingsImageView);
-            Picasso.with(getActivity()).load(res.getRating()).into(ratingsImage);
+            Picasso.with(getActivity()).load(res.getRating()).resize(250,50).into(ratingsImage);
 
             ImageView snippetImage = (ImageView) rootView.findViewById(R.id.snippetImageview);
-            Picasso.with(getActivity()).load(res.getSnippet()).into(snippetImage);
+            Picasso.with(getActivity()).load(res.getSnippet()).resize(400,400).into(snippetImage);
 
             ImageView googleStaticImage = (ImageView) rootView.findViewById(R.id.googleStaticMapImage);
-            String googleApiLatitude = res.getLocation().coordinate().latitude().toString();
-            String googleApiLongitude = res.getLocation().coordinate().longitude().toString();
+
+            String googleApiLatitude,googleApiLongitude;
+            try{
+                 googleApiLatitude = res.getLocation().coordinate().latitude().toString();
+                 googleApiLongitude = res.getLocation().coordinate().longitude().toString();
+                favButton.setVisibility(View.VISIBLE);
+
+            }catch(NullPointerException e){
+
+                googleApiLatitude = DetailActivity.latList.get(sectionNumber-1);
+                googleApiLongitude = DetailActivity.lonList.get(sectionNumber-1);
+                favButton.setText(getString(R.string.heart_fill));
+            }
+
             String url = "http://maps.google.com/maps/api/staticmap?center="
                           + googleApiLatitude + ","
                           + googleApiLongitude + "&zoom=15&size=200x200&sensor=false";
 
             Picasso.with(getActivity())
-                    .load(url)
+                    .load(url).resize(400,400)
                     .into(googleStaticImage);
 
             //googleStaticImage.setImageURI(Uri.parse(url));
 
+
+            try{
+                FavoriteDatabaseHelper favDbHelper = new FavoriteDatabaseHelper(getActivity());
+                String[] projection ={FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_NAME,
+                        FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_IMAGE,
+                        FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_RATING_URL,
+                        FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_PHONE_NUMBER,
+                        FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_REVIEWS_COUNT,
+                        FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_ADDRESS,
+                        FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_LONGITUDE,
+                        FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_LATITUDE
+
+                };
+
+                String selection = FavRestroContract.RestaurantEntry.COLUMN_NAME_RESTAURANT_NAME+"=?";
+                String[] selectionArgs = {res.getBusinessName()};
+                Cursor cursor = favDbHelper.fetchRows(projection,selection,selectionArgs,null);
+
+                if(cursor.moveToNext()){
+                    favButton.setText(R.string.heart_fill);
+                }else{
+                    favButton.setText(R.string.heart_empty);
+                }
+
+            }catch(Exception e){
+                Log.e("Cursor Error", e.getMessage());
+            }
 
             return rootView;
         }

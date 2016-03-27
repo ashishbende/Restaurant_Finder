@@ -5,12 +5,11 @@
         <item
             android:id="@+id/nav_search"
             android:icon="@android:drawable/ic_menu_search"
-            android:title="Import" />
+            android:title="Search" />
         <item
             android:id="@+id/nav_favorite"
             android:icon="@android:drawable/ic_menu_save"
-            android:title="Gallery" />
-
+            android:title="Favorites" />
     </group>
 
 </menu>

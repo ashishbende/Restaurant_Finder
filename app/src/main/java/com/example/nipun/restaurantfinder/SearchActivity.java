@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.yelp.clientlib.connection.YelpAPI;
 import com.yelp.clientlib.connection.YelpAPIFactory;
 import com.yelp.clientlib.entities.Business;
+import com.yelp.clientlib.entities.Coordinate;
 import com.yelp.clientlib.entities.SearchResponse;
 import com.yelp.clientlib.entities.options.CoordinateOptions;
 
@@ -51,9 +52,6 @@ import retrofit.Call;
 
 public class SearchActivity extends AppCompatActivity {
 
-    //////ksdufgksbkbksgb
-    //enjoylife
-
     private LinearLayout mContentLayout;
 
     private ListView listView;
@@ -61,14 +59,14 @@ public class SearchActivity extends AppCompatActivity {
     private List<Restaurant> restaurantList = new ArrayList<Restaurant>();
     private CoordinateOptions coordinate;
     private static final int PLACE_PICKER_REQUEST = 1;
-    private TextView smName;
+   /* private TextView smName;
     private TextView smAddress;
-    private TextView smAttributions;
+    private TextView smAttributions;*/
     private static final LatLngBounds BOUNDS_MOUNTAIN_VIEW = new LatLngBounds(
             new LatLng(37.398160, -122.180831), new LatLng(37.430610, -121.972090));
     public Place place;
     String toastMsg;
-    String sortingCriteria;
+    String sortingCriteria="0";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -82,6 +80,8 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_actionbar_icon);
+
 
 
         AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
@@ -90,8 +90,6 @@ public class SearchActivity extends AppCompatActivity {
 
                 Intent detailIntent = new Intent(SearchActivity.this, DetailActivity.class);
                 Log.d("View Value: ", view.toString());
-
-                //  detailIntent.pu
 
                 Wrapper arrayWrapper = new Wrapper(restaurantList);
                 detailIntent.putExtra("restaurants",arrayWrapper);
@@ -153,15 +151,7 @@ public class SearchActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-      /*  MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-*/
+
         getMenuInflater().inflate(R.menu.main, menu);
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -183,53 +173,56 @@ public class SearchActivity extends AppCompatActivity {
 
 
     private void handleIntent(Intent intent) {
-        Log.i("SearchActivity", "hiiiii");
+        Log.i("SearchActivity: ", "Inside handleIntent Method");
 
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            String location = intent.getStringExtra("Place");
-            Log.i("Query", query);
-            //use the query to search your data somehow
-            //Toast toast = Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT);
-            //toast.show();
+        String query="";
+        double latitude=0,longitude=0;
+        if(intent.getAction()!=null) {
 
+            if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+                query = intent.getStringExtra(SearchManager.QUERY);
+                //location = intent.getStringExtra("Place");
+                Log.i("Query", query);
+
+            } else if (intent.getAction().equals("DEFAULT_SEARCH")) {
+
+                query = intent.getStringExtra("query");
+                latitude = intent.getDoubleExtra("latitude", 0);
+                longitude = intent.getDoubleExtra("longitude", 0);
+
+            }
+        }
             if (restaurantList != null)
                 restaurantList.clear();
             if (adapter != null)
                 adapter.notifyDataSetChanged();
-
-
-            //place = PlacePicker.getPlace(this, intent);
-            if (place != null) {
-
-
-                Log.i(" Handle intent ", "Location is " + place.getName());
-                doMySearch(query);
-
-                YelpAPI yelpAPI = getYelpAPI();
-                try {
-                    requestYelpSearch(yelpAPI, "food");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+            if(latitude==0 && longitude ==0) {
+                //settting default location as San Jose
+                latitude =37.7577;
+                longitude =-122.4376;
             }
 
-
+           // Log.i(" Handle intent ", "Location is " + place.getName());
+        CoordinateOptions currentCoordinate = CoordinateOptions.builder()
+                .latitude(latitude)
+                .longitude(longitude).build();
+        if(query!=null) {
+            doMySearch(currentCoordinate, query);
+        }else{
+            Toast.makeText(this,"Please input your query",Toast.LENGTH_LONG).show();
         }
-
 
     }
 
 
+
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.getlocation) {
 
 
@@ -270,10 +263,6 @@ public class SearchActivity extends AppCompatActivity {
             if (attributions == null) {
                 attributions = "";
             }
-
-          /*  smName.setText(name);
-            smAddress.setText(address);
-            smAttributions.setText(Html.fromHtml(attributions));*/
 
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -349,36 +338,26 @@ public class SearchActivity extends AppCompatActivity {
 
             if (result != null) {
                 StringBuilder response1 = new StringBuilder();
-                for (Business obj : result) {
+                for (Business YelpObj : result) {
 
-                    Restaurant restro = new Restaurant();
-                    restro.setImageUrl(obj.imageUrl());
-                    restro.setBusinessName(obj.name());
-                    restro.setRating(obj.ratingImgUrlLarge());
-                    restro.setDisplayAddress(obj.location().displayAddress());
-                    restro.setPhoneNumber(obj.phone());
-                    restro.setReviewCount(obj.reviewCount());
+                    Restaurant restaurant = new Restaurant();
+                    restaurant.setImageUrl(YelpObj.imageUrl());
+                    restaurant.setBusinessName(YelpObj.name());
+                    restaurant.setRating(YelpObj.ratingImgUrlLarge());
+                    restaurant.setDisplayAddress(YelpObj.location().displayAddress());
+                    restaurant.setPhoneNumber(YelpObj.phone());
+                    restaurant.setReviewCount(YelpObj.reviewCount());
                     //ArrayList<String>
-                    restro.setDisplayAddress(obj.location().displayAddress());
-                    restro.setImageUrl(obj.imageUrl());
-                    restro.setSnippet(obj.snippetImageUrl());
-                    restro.setLocation(obj.location());
+                    restaurant.setDisplayAddress(YelpObj.location().displayAddress());
+                    restaurant.setImageUrl(YelpObj.imageUrl());
+                    restaurant.setSnippet(YelpObj.snippetImageUrl());
+                    restaurant.setLocation(YelpObj.location());
                     //Log.i("Yelp response :", response1.toString());
-                    restaurantList.add(restro);
-                }
-                Log.i("Response", response1.toString());
-
-                // Display Image from Web without downloading
-            /*public static Drawable LoadImageFromWebOperations(String url) {
-                try {
-                    InputStream is = (InputStream) new URL(url).getContent();
-                    Drawable d = Drawable.createFromStream(is, "src name");
-                    return d;
-                } catch (Exception e) {
-                    return null;
+                    restaurantList.add(restaurant);
                 }
 
-            }*/
+                //Log.i("Response", response1.toString());
+
                 adapter.notifyDataSetChanged();
 
             }
@@ -386,15 +365,12 @@ public class SearchActivity extends AppCompatActivity {
     }
 
 
-    private void doMySearch(String query) {
-
-
-        //   listView.setAdapter(null);
+    private void doMySearch(CoordinateOptions coordinate, String query) {
 
 
         YelpAPI yelpAPI = getYelpAPI();
         try {
-            requestYelpSearch(yelpAPI, query);
+            requestYelpSearch(yelpAPI, query,coordinate);
         } catch (IOException e) {
 
             Log.i("Exception", "Message" + e.getMessage());
@@ -406,10 +382,7 @@ public class SearchActivity extends AppCompatActivity {
 
 
     private YelpAPI getYelpAPI() {
-       /* String consumerkey = getResources().getString(R.string.consumerKey);
-        String consumerSecrete = getResources().getString(R.string.consumerSecret);
-        String token = getResources().getString(R.string.token);
-        String tokenSecret = getResources().getString(R.string.tokenSecret);*/
+
 
         String consumerkey = getResources().getString(R.string.consumerKey);
         String consumerSecrete = getResources().getString(R.string.consumerSecret);
@@ -423,8 +396,11 @@ public class SearchActivity extends AppCompatActivity {
     }
 
 
-    private void requestYelpSearch(YelpAPI YelpAPI, String searchString) throws IOException {
+    private void requestYelpSearch(YelpAPI YelpAPI, String searchString,CoordinateOptions coordinate) throws IOException {
         Map<String, String> params = new HashMap<>();
+
+        Log.i("Search string",searchString);
+        Log.i("Sorting string",sortingCriteria);
 
         params.put("category_filter", "restaurants");
         params.put("term", searchString);
@@ -434,12 +410,9 @@ public class SearchActivity extends AppCompatActivity {
         params.put("lang", "en");
 
 
-        if (place != null) {
-            coordinate = CoordinateOptions.builder().latitude(place.getLatLng().latitude).longitude(place.getLatLng().longitude).build();
-        } else {
+        if(coordinate == null){
             coordinate = CoordinateOptions.builder().latitude(37.3413170).longitude(-121.8978294).build();
         }
-        // Call<SearchResponse> call = YelpAPI.search("San Jose", params);
 
         Call<SearchResponse> call = YelpAPI.search(coordinate, params);
 

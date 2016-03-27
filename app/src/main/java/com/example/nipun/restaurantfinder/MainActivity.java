@@ -2,13 +2,18 @@ package com.example.nipun.restaurantfinder;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -28,8 +33,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,11 +71,26 @@ public class MainActivity extends AppCompatActivity
     private TextView mAttributions;
     private static final LatLngBounds BOUNDS_MOUNTAIN_VIEW = new LatLngBounds(
             new LatLng(37.398160, -122.180831), new LatLng(37.430610, -121.972090));
-     public  Place place;
+    public  Place place;
     public double currentLatitude, currentLongitude;
 
-private GoogleApiClient Gclient;
-private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
+    private GoogleApiClient Gclient;
+    private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
+    private DrawerLayout drawerLayout;
+    private String[] menuTitles;
+    private ListView drawerList;
+    private ActionBarDrawerToggle drawerToggle;
+    private int currentNavPosition =0;
+
+
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener{
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            selectItem(position);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +99,34 @@ private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_action_name);
 
+        menuTitles = getResources().getStringArray(R.array.drawer_menu);
+        drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        drawerList = (ListView)findViewById(R.id.drawer);
+        drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1, menuTitles));
+        drawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        if(savedInstanceState!=null){
+            currentNavPosition = savedInstanceState.getInt("position");
+            setActionBarTitle(currentNavPosition);
+        }
+
+
+        final ListView listView = (ListView)findViewById(R.id.main_menu);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> myAdapter, View myView, int position, long id) {
+                String selectedItem = (listView.getItemAtPosition(position).toString());
+                Intent queryIntent = new Intent(MainActivity.this, SearchActivity.class);
+
+                queryIntent.setAction("DEFAULT_SEARCH");
+                queryIntent.putExtra("query",selectedItem);
+                queryIntent.putExtra("latitude",currentLatitude);
+                queryIntent.putExtra("longitude",currentLongitude);
+                startActivity(queryIntent);
+            }
+        });
 
         mName = (TextView) findViewById(R.id.textView);
         mAddress = (TextView) findViewById(R.id.textView2);
@@ -90,54 +140,127 @@ private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
         .build();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        /*  To manage what option menu will be seen, we will put drawer listener
+        * */
+        drawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.drawer_open,R.string.drawer_close){
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                //invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //invalidateOptionsMenu();
+            }
+
+        };
+        drawerToggle.setDrawerIndicatorEnabled(true);
+        drawerLayout.setDrawerListener(drawerToggle);
+
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        //getSupportActionBar().setLogo(R.drawable.ic_action_name);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+       // getSupportActionBar().set
+        //getSupportActionBar().set
+        //  getSupportActionBar().setIcon(R.drawable.ic_actionbar_icon);
+
+    /*  getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener(){
+
+          @Override
+          public void onBackStackChanged() {
+              FragmentManager fragMgr = getFragmentManager();
+              Fragment fragment = fragMgr.findFragmentByTag("visible_fragment");
+              if(fragment instanceof SearchActivity){
+                  currentNavPosition = 1;
+              }
+              if(fragment instanceof FavoriteActivity){
+                  currentNavPosition = 2;
+              }
+              setActionBarTitle(currentNavPosition);
+              drawerList.setItemChecked(currentNavPosition,true);
+          }
+      });
+*/
     }
 
 
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putInt("position",currentNavPosition);
+    }
 
-    private void requestYelpSearch(YelpAPI YelpAPI) throws IOException {
-        Map<String, String> params = new HashMap<>();
-// general params
-        params.put("term", "food");
-        params.put("limit", "3");
-// locale params
-        params.put("lang", "en");
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean drawerOpen = drawerLayout.isDrawerOpen(drawerList);
+        //menu.findItem(R.id.action_share).setVisible(!drawerOpen);
+        return super.onPrepareOptionsMenu(menu);
+    }
 
-        Call<SearchResponse> call = YelpAPI.search("San Francisco", params);
-// Response<SearchResponse> response = call.execute();
-        SearchResponse searchResponse = call.execute().body();
 
-        int totalNumberOfResult = searchResponse.total();
-        ArrayList<Business> result = searchResponse.businesses();
+    @Override
+    public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onPostCreate(savedInstanceState, persistentState);
+        //sync actionbardrawertoggle state with drawer
+        drawerToggle.syncState();
+    }
 
-        StringBuilder response = new StringBuilder();
-        for (Business obj: result) {
-            response.append(obj.name())
-                    .append(obj.rating())
-                    .append(obj.categories());
-            Log.i("Yelp response :", response.toString());
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        //save current fragment position if activity destroyed.
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    private void selectItem(int position){
+        currentNavPosition = position;
+        Intent navIntent;
+        //Fragment fragment;
+        switch(position){
+            case 0:
+                Toast.makeText(this,"Search Activity",Toast.LENGTH_LONG).show();
+                navIntent = new Intent(MainActivity.this,SearchActivity.class);
+                startActivity(navIntent);
+                //fragment = new SearchActivity();
+                break;
+            case 1:
+                Toast.makeText(this,"Favorite Activity",Toast.LENGTH_LONG).show();
+                navIntent = new Intent(MainActivity.this,FavoriteActivity.class);
+                startActivity(navIntent);
+                //fragment = new FavoriteActivity();
+                break;
+
+            default:
+                navIntent = new Intent(MainActivity.this,MainActivity.class);
+                startActivity(navIntent);
+               // fragment = new MainActivity();
         }
 
-//return response.toString();
+
+      /*  FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.content_frame,fragment,"visible_fragment");
+        ft.addToBackStack(null);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.commit();*/
+       // setActionBarTitle(position);
+        drawerLayout.closeDrawer(drawerList);
     }
 
-    private YelpAPI getYelpAPI() {
-        String consumerkey = getResources().getString(R.string.consumerKey);
-        String consumerSecrete = getResources().getString(R.string.consumerSecret);
-        String token = getResources().getString(R.string.token);
-        String tokenSecret = getResources().getString(R.string.tokenSecret);
 
-        YelpAPIFactory apiFactory = new YelpAPIFactory(consumerkey,consumerSecrete,token,tokenSecret);
-        YelpAPI yelpAPI = apiFactory.createAPI();
-        return yelpAPI;
+    private void setActionBarTitle(int position){
+        String title;
+        if(position ==0){
+            title=getResources().getString(R.string.app_name);
+        }else{
+            title=menuTitles[position];
+        }
+        getSupportActionBar().setTitle(title);
     }
+
 
 
 
@@ -146,6 +269,9 @@ private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        if(drawerToggle.onOptionsItemSelected(item)){
+            return true;
+        }
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -332,7 +458,7 @@ private static final int MY_PERMISSIONS_COARSE_LOCATION = 224;
                     // contacts-related task you need to do.
 
                 } else {
-                    Toast.makeText(MainActivity.this,"Coarse Denied",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,"Coarse Denied, Current Location San Francisco",Toast.LENGTH_LONG).show();
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.

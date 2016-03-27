@@ -1,28 +1,40 @@
 <resources>
     <string name="app_name">Restaurant Finder</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Close drawer</string>
     <string name="consumerKey">LxWoEg49WquC6DlKeOpqiA</string>
     <string name="consumerSecret">W8R3nQe9JPNkj81kKgGF_D07z3c</string>
     <string name="token">HGOXjLe8PzHCISL_rx_6HfDaoJ-9HRN6</string>
     <string name="tokenSecret">fWofnA5BvTMBzY7qXWLV3oFNdAU</string>
+
+
+
     <string name="action_settings">Settings</string>
     <string name="search_label">Search Lable</string>
     <string name="search_hint">Search hint</string>
-    <string name="title_activity_detail">DetailActivity</string>
+    <string name="title_activity_detail">Details </string>
+    <string name="title_activity_favorite">Favorites</string>
+    <string name="title_activity_search">Search</string>
+
+
     <string name="section_format">Hello World from section: %1$d</string>
 
     <string name="heart_empty">&#xf08a;</string>
     <string name="heart_fill">&#xf004;</string>
 
     <string-array name="main_menu_options">
-        <item>Restaurants</item>
-        <item>Bars</item>
-        <item>Coffee and Tea</item>
+        <item>Mediterranean</item>
+        <item>Greek</item>
+        <item>Thai</item>
         <item>Indian</item>
         <item>Mexican</item>
         <item>Chinese</item>
         <item>Italian</item>
+    </string-array>
+
+    <string-array name="drawer_menu">
+        <item>Search</item>
+        <item>Favorites</item>
     </string-array>
 </resources>

@@ -70,14 +70,13 @@ public class CustomListAdapter extends BaseAdapter {
 		TextView genre = (TextView) convertView.findViewById(R.id.genre);
 		TextView year = (TextView) convertView.findViewById(R.id.releaseYear);*/
         TextView businessname = (TextView) convertView.findViewById(R.id.businessname);
-
         TextView address = (TextView) convertView.findViewById(R.id.address);
 
         // getting movie data for the row
         //Movie m = movieItems.get(position);
 
         Restaurant r = restaurantsItems.get(position);
-        businessname.setText(r.getBusinessName());
+        businessname.setText(position+1+"."+r.getBusinessName());
         String displayAddress = r.getdisplayAddress().toString();
         address.setText(displayAddress.substring(1, displayAddress.length() - 1));
 
@@ -95,32 +94,7 @@ public class CustomListAdapter extends BaseAdapter {
                 .load(r.getRating())
                 .into(ratingImage);
 
-      /*  MyAsyncTaskForImage myAsyncTaskForImage = new MyAsyncTaskForImage();
-        myAsyncTaskForImage.execute(r.getImageUrl());
 
-        MyAsyncTaskForRating myAsyncTaskForRating = new MyAsyncTaskForRating();
-        myAsyncTaskForRating.execute(r.getRating());*/
-
-        // thumbnail image
-        //thumbNail.setImageUrl(m.getThumbnailUrl(), imageLoader);
-
-        // title
-        //title.setText(m.getTitle());
-
-        // rating
-        //rating.setText("Rating: " + String.valueOf(m.getRating()));
-
-        // genre
-		/*String genreStr = "";
-		for (String str : m.getGenre()) {
-			genreStr += str + ", ";
-		}*/
-        //genreStr = genreStr.length() > 0 ? genreStr.substring(0,
-        //		genreStr.length() - 2) : genreStr;
-        //genre.setText(genreStr);
-
-        // release year
-        //year.setText(String.valueOf(m.getYear()));
 
         return convertView;
     }
@@ -129,58 +103,6 @@ public class CustomListAdapter extends BaseAdapter {
     public void clear(){
 
         restaurantsItems.clear();
-    }
-    private class MyAsyncTaskForImage extends AsyncTask<String,Void,Bitmap> {
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            Bitmap bitmap;
-            for(String str:params){
-                try {
-                    URL imageUrl = new URL(str);
-                    HttpURLConnection connectionImage = (HttpURLConnection) imageUrl.openConnection();
-                    connectionImage.setDoInput(true);
-                    connectionImage.connect();
-                    InputStream inputImage = connectionImage.getInputStream();
-                    bitmap = BitmapFactory.decodeStream(inputImage);
-                    return bitmap;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        protected void onPostExecute(Bitmap b){
-            image.setImageBitmap(b);
-        }
-
-    }
-
-    private class MyAsyncTaskForRating extends AsyncTask<String,Void,Bitmap> {
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            Bitmap bitmap;
-
-            for(String str:params){
-                try {
-                    URL ratingUrl = new URL(str);
-                    HttpURLConnection connectionRating = (HttpURLConnection) ratingUrl.openConnection();
-                    connectionRating.setDoInput(true);
-                    connectionRating.connect();
-                    InputStream inputRating = connectionRating.getInputStream();
-                    bitmap = BitmapFactory.decodeStream(inputRating);
-                    return bitmap;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        protected void onPostExecute(Bitmap b){
-            ratingImage.setImageBitmap(b);
-        }
-
     }
 
 

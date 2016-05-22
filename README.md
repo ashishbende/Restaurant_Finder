@@ -10,3 +10,4 @@ This app utilizes Yelp Android API and delivers location based restaurants.
 ❤️
 
 ❤
+        }else if(saveButton.titleLabel?.text=="♡"){
